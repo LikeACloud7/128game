@@ -8,7 +8,7 @@ export const moveMapIn2048Rule = (
   map: Map2048,
   direction: Direction,
 ): MoveResult => {
-  if (!validateMapIsNByM(map)) throw new Error("Map is not N by M");
+  if (!validateMapIsNByM(map)) throw new Error('Map is not N by M');
 
   const rotatedMap = rotateMapCounterClockwise(map, rotateDegreeMap[direction]);
 
@@ -17,8 +17,79 @@ export const moveMapIn2048Rule = (
   return {
     result: rotateMapCounterClockwise(result, revertDegreeMap[direction]),
     isMoved,
-    score
+    score,
   };
+};
+
+export const addRandomTile = (grid: Map2048): Map2048 => {
+  const newGrid = grid.map((row) => row.slice());
+
+  const emptyTiles: Coord[] = [];
+  grid.forEach((row, i) => {
+    row.forEach((value, j) => {
+      if (value === null) emptyTiles.push({ i, j });
+    });
+  });
+  if (emptyTiles.length === 0) return newGrid;
+
+  const selectedCoord =
+    emptyTiles[Math.floor(Math.random() * emptyTiles.length)];
+  if (selectedCoord === undefined) return newGrid;
+  const { i, j } = selectedCoord;
+
+  if (newGrid[i] !== undefined) {
+    newGrid[i][j] = Math.random() > 0.1 ? 2 : 4;
+  }
+
+  return newGrid;
+};
+
+export const initBoard = (): Map2048 => {
+  const board: Map2048 = [
+    [null, null, null, null],
+    [null, null, null, null],
+    [null, null, null, null],
+    [null, null, null, null],
+  ];
+  return addRandomTile(addRandomTile(board));
+};
+
+export const resetGame = (
+  setState: React.Dispatch<React.SetStateAction<State>>,
+) => {
+  setState({
+    score: 0,
+    board: initBoard(),
+    isSuccess: false,
+    isFailed: false,
+  });
+};
+
+export const successCheck = ({ state, setState }: stateProps) => {
+  if (state.board.some((row) => row.includes(128))) {
+    setState({
+      ...state,
+      isSuccess: true,
+    });
+    return;
+  }
+};
+
+export const failedCheck = ({ state, setState }: stateProps) => {
+  const allDirection: Direction[] = ['up', 'down', 'left', 'right'];
+
+  const canMoveInAnyDirection = allDirection.some((dir) => {
+    const { isMoved: canMove } = moveMapIn2048Rule(state.board, dir);
+    return canMove;
+  });
+
+  if (!canMoveInAnyDirection) {
+    setState({
+      ...state,
+      isFailed: true,
+    });
+    return;
+  }
 };
 
 const validateMapIsNByM = (map: Map2048) => {
@@ -40,7 +111,8 @@ const rotateMapCounterClockwise = (
       return Array.from({ length: columnLength }, (_, columnIndex) =>
         Array.from(
           { length: rowLength },
-          (_, rowIndex) => map[rowIndex]?.[columnLength - columnIndex - 1] ?? null,
+          (_, rowIndex) =>
+            map[rowIndex]?.[columnLength - columnIndex - 1] ?? null,
         ),
       );
     case 180:
@@ -48,7 +120,8 @@ const rotateMapCounterClockwise = (
         Array.from(
           { length: columnLength },
           (_, columnIndex) =>
-            map[rowLength - rowIndex - 1]?.[columnLength - columnIndex - 1] ?? null,
+            map[rowLength - rowIndex - 1]?.[columnLength - columnIndex - 1] ??
+            null,
         ),
       );
     case 270:
@@ -65,11 +138,16 @@ const moveLeft = (map: Map2048): MoveResult & { score: number } => {
   const movedRows = map.map(moveRowLeft);
   const result = movedRows.map((movedRow) => movedRow.result);
   const isMoved = movedRows.some((movedRow) => movedRow.isMoved);
-  const score = movedRows.reduce((total, movedRow) => total + movedRow.score, 0); // 점수 합산
+  const score = movedRows.reduce(
+    (total, movedRow) => total + movedRow.score,
+    0,
+  ); // 점수 합산
   return { result, isMoved, score }; // 점수 포함
 };
 
-const moveRowLeft = (row: Cell[]): { result: Cell[]; isMoved: boolean; score: number } => {
+const moveRowLeft = (
+  row: Cell[],
+): { result: Cell[]; isMoved: boolean; score: number } => {
   const reduced = row.reduce(
     (acc: { lastCell: Cell; result: Cell[]; score: number }, cell) => {
       if (cell === null) {
@@ -77,9 +155,17 @@ const moveRowLeft = (row: Cell[]): { result: Cell[]; isMoved: boolean; score: nu
       } else if (acc.lastCell === null) {
         return { ...acc, lastCell: cell, score: acc.score };
       } else if (acc.lastCell === cell) {
-        return { result: [...acc.result, cell * 2], lastCell: null, score: acc.score + cell * 2 };
+        return {
+          result: [...acc.result, cell * 2],
+          lastCell: null,
+          score: acc.score + cell * 2,
+        };
       } else {
-        return { result: [...acc.result, acc.lastCell], lastCell: cell, score: acc.score };
+        return {
+          result: [...acc.result, acc.lastCell],
+          lastCell: cell,
+          score: acc.score,
+        };
       }
     },
     { lastCell: null, result: [], score: 0 },
@@ -112,9 +198,23 @@ const revertDegreeMap: DirectionDegreeMap = {
   left: 0,
 };
 
-type Cell = number | null;
+export type Cell = number | null;
 export type Map2048 = Cell[][];
-type Direction = "up" | "left" | "right" | "down";
+type Direction = 'up' | 'left' | 'right' | 'down';
 type RotateDegree = 0 | 90 | 180 | 270;
 type DirectionDegreeMap = Record<Direction, RotateDegree>;
-type MoveResult = { result: Map2048; isMoved: boolean, score: number };
+type MoveResult = { result: Map2048; isMoved: boolean; score: number };
+type Coord = {
+  i: number;
+  j: number;
+};
+export type State = {
+  score: number;
+  board: Map2048;
+  isSuccess: boolean;
+  isFailed: boolean;
+};
+export type stateProps = {
+  state: State;
+  setState: React.Dispatch<React.SetStateAction<State>>;
+};
