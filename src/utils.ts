@@ -12,11 +12,12 @@ export const moveMapIn2048Rule = (
 
   const rotatedMap = rotateMapCounterClockwise(map, rotateDegreeMap[direction]);
 
-  const { result, isMoved } = moveLeft(rotatedMap);
+  const { result, isMoved, score } = moveLeft(rotatedMap);
 
   return {
     result: rotateMapCounterClockwise(result, revertDegreeMap[direction]),
     isMoved,
+    score
   };
 };
 
@@ -60,27 +61,28 @@ const rotateMapCounterClockwise = (
   }
 };
 
-const moveLeft = (map: Map2048): MoveResult => {
+const moveLeft = (map: Map2048): MoveResult & { score: number } => {
   const movedRows = map.map(moveRowLeft);
   const result = movedRows.map((movedRow) => movedRow.result);
   const isMoved = movedRows.some((movedRow) => movedRow.isMoved);
-  return { result, isMoved };
+  const score = movedRows.reduce((total, movedRow) => total + movedRow.score, 0); // 점수 합산
+  return { result, isMoved, score }; // 점수 포함
 };
 
-const moveRowLeft = (row: Cell[]): { result: Cell[]; isMoved: boolean } => {
+const moveRowLeft = (row: Cell[]): { result: Cell[]; isMoved: boolean; score: number } => {
   const reduced = row.reduce(
-    (acc: { lastCell: Cell; result: Cell[] }, cell) => {
+    (acc: { lastCell: Cell; result: Cell[]; score: number }, cell) => {
       if (cell === null) {
         return acc;
       } else if (acc.lastCell === null) {
-        return { ...acc, lastCell: cell };
+        return { ...acc, lastCell: cell, score: acc.score };
       } else if (acc.lastCell === cell) {
-        return { result: [...acc.result, cell * 2], lastCell: null };
+        return { result: [...acc.result, cell * 2], lastCell: null, score: acc.score + cell * 2 };
       } else {
-        return { result: [...acc.result, acc.lastCell], lastCell: cell };
+        return { result: [...acc.result, acc.lastCell], lastCell: cell, score: acc.score };
       }
     },
-    { lastCell: null, result: [] },
+    { lastCell: null, result: [], score: 0 },
   );
 
   const result = [...reduced.result, reduced.lastCell];
@@ -92,6 +94,7 @@ const moveRowLeft = (row: Cell[]): { result: Cell[]; isMoved: boolean } => {
   return {
     result: resultRow,
     isMoved: row.some((cell, i) => cell !== resultRow[i]),
+    score: reduced.score,
   };
 };
 
@@ -114,4 +117,4 @@ export type Map2048 = Cell[][];
 type Direction = "up" | "left" | "right" | "down";
 type RotateDegree = 0 | 90 | 180 | 270;
 type DirectionDegreeMap = Record<Direction, RotateDegree>;
-type MoveResult = { result: Map2048; isMoved: boolean };
+type MoveResult = { result: Map2048; isMoved: boolean, score: number };
