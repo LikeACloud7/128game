@@ -38,13 +38,18 @@ export const Board = ({ state, setState }: stateProps) => {
       return;
     }
 
-    setState({
-      ...state,
-      board: addRandomTile(moved.result),
-      score: state.score + moved.score,
-    });
+    const newBoard = addRandomTile(moved.result);
+    const newScore = state.score + moved.score;
 
-    successCheck({ state, setState });
+    // 상태 업데이트
+    setState((prevState) => ({
+      ...prevState,
+      board: newBoard,
+      score: newScore,
+    }));
+
+    // 새로운 보드 상태를 사용하여 successCheck 호출
+    successCheck({ state: { ...state, board: newBoard }, setState });
   };
 
   useEffect(() => {
