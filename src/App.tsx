@@ -1,6 +1,6 @@
 import './App.css';
 
-import { useState } from 'react';
+import { useEffect,useState } from 'react';
 
 import { Board } from './components/Board.tsx';
 import { Controller } from './components/Controller.tsx';
@@ -9,12 +9,22 @@ import { Modal } from './components/Modal.tsx';
 import { initBoard, type State } from './utils.ts';
 
 function App() {
-  const [state, setState] = useState<State>({
-    score: 0,
-    board: initBoard(),
-    isSuccess: false,
-    isFailed: false,
+  const [state, setState] = useState<State>(() => {
+    const savedState = localStorage.getItem('gameState');
+    if (savedState != null) {
+      return JSON.parse(savedState) as State;
+    }
+    return {
+      score: 0,
+      board: initBoard(),
+      isSuccess: false,
+      isFailed: false,
+    };
   });
+
+  useEffect(() => {
+    localStorage.setItem('gameState', JSON.stringify(state));
+  }, [state]);
 
   return (
     <>
