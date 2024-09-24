@@ -1,6 +1,6 @@
 import './App.css';
 
-import { useEffect,useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Board } from './components/Board.tsx';
 import { Controller } from './components/Controller.tsx';
