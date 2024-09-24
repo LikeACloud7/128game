@@ -141,8 +141,8 @@ const moveLeft = (map: Map2048): MoveResult & { score: number } => {
   const score = movedRows.reduce(
     (total, movedRow) => total + movedRow.score,
     0,
-  ); // 점수 합산
-  return { result, isMoved, score }; // 점수 포함
+  );
+  return { result, isMoved, score };
 };
 
 const moveRowLeft = (
