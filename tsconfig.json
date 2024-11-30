@@ -18,5 +18,10 @@
     "noUncheckedIndexedAccess": true,
     "verbatimModuleSyntax": true
   },
-  "include": ["src", "vite.config.ts"]
+  "include": [
+    "src/**/*",
+    "vite.config.ts",
+    "tailwind.config.js",
+    "postcss.config.js"
+  ]
 }
