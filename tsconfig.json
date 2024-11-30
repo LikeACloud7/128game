@@ -16,7 +16,13 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": true,
-    "verbatimModuleSyntax": true
+    "verbatimModuleSyntax": true,
+    "allowJs": true
   },
-  "include": ["src", "vite.config.ts"]
+  "include": [
+    "src/**/*",
+    "vite.config.ts",
+    "postcss.config.js",
+    "tailwind.config.js"
+  ]
 }

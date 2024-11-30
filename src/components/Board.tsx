@@ -1,13 +1,12 @@
 import { useEffect } from 'react';
 
+import { failedCheck, successCheck } from '../utils/gameLogic.ts';
 import {
   addRandomTile,
-  failedCheck,
   type Map2048,
   moveMapIn2048Rule,
-  type stateProps,
-  successCheck,
-} from '../utils.ts';
+} from '../utils/\bmoveMapLogic.ts';
+import type { stateProps } from '../utils/types.ts';
 import { Tile } from './Tile.tsx';
 
 export const Board = ({ state, setState }: stateProps) => {
@@ -59,7 +58,7 @@ export const Board = ({ state, setState }: stateProps) => {
 
   return (
     <>
-      <div className="board">
+      <div className="w-96 h-96 grid grid-cols-4 grid-rows-4 bg-green-300 m-auto gap-3 rounded-lg p-3">
         {state.board.map((row, rowIdx) =>
           row.map((value, colIdx) => (
             <Tile key={10 * rowIdx + colIdx} value={value} />

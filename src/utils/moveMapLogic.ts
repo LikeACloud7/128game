@@ -54,44 +54,6 @@ export const initBoard = (): Map2048 => {
   return addRandomTile(addRandomTile(board));
 };
 
-export const resetGame = (
-  setState: React.Dispatch<React.SetStateAction<State>>,
-) => {
-  setState({
-    score: 0,
-    board: initBoard(),
-    isSuccess: false,
-    isFailed: false,
-  });
-};
-
-export const successCheck = ({ state, setState }: stateProps) => {
-  if (state.board.some((row) => row.includes(128))) {
-    setState({
-      ...state,
-      isSuccess: true,
-    });
-    return;
-  }
-};
-
-export const failedCheck = ({ state, setState }: stateProps) => {
-  const allDirection: Direction[] = ['up', 'down', 'left', 'right'];
-
-  const canMoveInAnyDirection = allDirection.some((dir) => {
-    const { isMoved: canMove } = moveMapIn2048Rule(state.board, dir);
-    return canMove;
-  });
-
-  if (!canMoveInAnyDirection) {
-    setState({
-      ...state,
-      isFailed: true,
-    });
-    return;
-  }
-};
-
 const validateMapIsNByM = (map: Map2048) => {
   const firstColumnCount = map[0]?.length;
   return map.every((row) => row.length === firstColumnCount);
@@ -141,8 +103,8 @@ const moveLeft = (map: Map2048): MoveResult & { score: number } => {
   const score = movedRows.reduce(
     (total, movedRow) => total + movedRow.score,
     0,
-  ); // 점수 합산
-  return { result, isMoved, score }; // 점수 포함
+  );
+  return { result, isMoved, score };
 };
 
 const moveRowLeft = (
@@ -200,21 +162,11 @@ const revertDegreeMap: DirectionDegreeMap = {
 
 export type Cell = number | null;
 export type Map2048 = Cell[][];
-type Direction = 'up' | 'left' | 'right' | 'down';
+export type Direction = 'up' | 'left' | 'right' | 'down';
 type RotateDegree = 0 | 90 | 180 | 270;
 type DirectionDegreeMap = Record<Direction, RotateDegree>;
 type MoveResult = { result: Map2048; isMoved: boolean; score: number };
 type Coord = {
   i: number;
   j: number;
-};
-export type State = {
-  score: number;
-  board: Map2048;
-  isSuccess: boolean;
-  isFailed: boolean;
-};
-export type stateProps = {
-  state: State;
-  setState: React.Dispatch<React.SetStateAction<State>>;
 };
